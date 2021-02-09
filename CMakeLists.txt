@@ -10,9 +10,14 @@ target_link_libraries(simple_kernel_run PRIVATE ze_loader)
 set(OCLKernelBC ${PROJECT_BINARY_DIR}/test.bc)
 set(OCLKernelSRC ${PROJECT_SOURCE_DIR}/oclSimpleKernel.cl)
 set(OCLKernelSPV ${PROJECT_BINARY_DIR}/test.spv)
+set(HandWrittenLL ${PROJECT_SOURCE_DIR}/kernel_sample.ll)
+set(HandWrittenBC ${PROJECT_BINARY_DIR}/hand.bc)
+set(HandWrittenSPV ${PROJECT_BINARY_DIR}/hand.spv)
 
 add_custom_target(TestBC ALL DEPENDS ${OCLKernelBC})
 add_custom_target(TestSPV ALL DEPENDS ${OCLKernelSPV})
+add_custom_target(HandBC ALL DEPENDS ${HandWrittenBC})
+add_custom_target(HandSPV ALL DEPENDS ${HandWrittenSPV})
 
 add_custom_command(
     OUTPUT test.bc
@@ -21,7 +26,18 @@ add_custom_command(
 )
 
 add_custom_command(
-    OUTPUT test.spv
-    COMMAND llvm-spirv ${OCLKernelBC} -o ${OCLKernelSPV}
-    DEPENDS ${OCLKernelBC}
+    OUTPUT ${HandWrittenBC}
+    COMMAND llvm-as ${HandWrittenLL} -o ${HandWrittenBC}
+    DEPENDS ${HandWrittenLL}
 )
+
+function(add_compile_spirv_cmd IN OUT)
+    add_custom_command(
+        OUTPUT ${OUT}
+        COMMAND llvm-spirv ${IN} -o ${OUT}
+        DEPENDS ${IN}
+    )
+endfunction()
+
+add_compile_spirv_cmd(${OCLKernelBC} ${OCLKernelSPV})
+add_compile_spirv_cmd(${HandWrittenBC} ${HandWrittenSPV})

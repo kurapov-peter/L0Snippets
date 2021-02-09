@@ -25,7 +25,8 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
                           ze_device_handle_t &hDevice,
                           ze_module_handle_t &hModule,
                           ze_command_queue_handle_t &hCommandQueue,
-                          ze_context_handle_t &hContext) {
+                          ze_context_handle_t &hContext,
+                          std::string &spvFilename) {
   ze_init_flag_t init_flag;
   L0_SAFE_CALL(zeInit(0));
 
@@ -78,7 +79,7 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
                                     &hCommandQueue));
 
   std::ifstream is;
-  std::string fn = "test.spv";
+  std::string fn = spvFilename;
 
   is.open(fn, std::ios::binary);
   if (!is.good()) {
@@ -128,13 +129,18 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
   log.close();
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    std::string spvFilename = "test.spv";
+    if (argc > 1) {
+        spvFilename = std::string(argv[1]);
+    }
+
     ze_device_handle_t hDevice = nullptr;
     ze_module_handle_t hModule = nullptr;
     ze_driver_handle_t hDriver = nullptr;
     ze_command_queue_handle_t hCommandQueue = nullptr;
     ze_context_handle_t hContext = nullptr;
-    L0InitContext(hDriver, hDevice, hModule, hCommandQueue, hContext);
+    L0InitContext(hDriver, hDevice, hModule, hCommandQueue, hContext, spvFilename);
 
     ze_command_list_handle_t hCommandList;
     ze_kernel_handle_t hKernel;
