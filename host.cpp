@@ -4,6 +4,7 @@
 #include <limits>
 #include <cassert>
 #include <fstream>
+#include <string>
 
 #define L0_SAFE_CALL(call)                                                     \
   {                                                                            \
@@ -108,8 +109,23 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
   moduleDesc.inputSize = codeSize;
   moduleDesc.pConstants = nullptr;
   moduleDesc.pInputModule = codeBin;
+
+  ze_module_build_log_handle_t buildlog = nullptr;
   L0_SAFE_CALL(
-      zeModuleCreate(hContext, hDevice, &moduleDesc, &hModule, nullptr));
+      zeModuleCreate(hContext, hDevice, &moduleDesc, &hModule, &buildlog));
+  size_t szLog = 0;
+  L0_SAFE_CALL(zeModuleBuildLogGetString(buildlog, &szLog, nullptr));
+  std::cout << "Got build log size " << szLog << std::endl;
+  char* strLog = (char*)malloc(szLog);
+  L0_SAFE_CALL(zeModuleBuildLogGetString(buildlog, &szLog, strLog));
+  std::fstream log;
+  log.open("log.txt", std::ios::app);
+  if (!log.good()) {
+    std::cerr << "Unable to open log file" << std::endl;
+    exit(1);
+  }
+  log << strLog;
+  log.close();
 }
 
 int main() {
