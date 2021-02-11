@@ -7,6 +7,17 @@ target_link_libraries(gpu_avail_check PRIVATE ze_loader)
 add_executable(simple_kernel_run host.cpp)
 target_link_libraries(simple_kernel_run PRIVATE ze_loader)
 
+find_package(LLVM REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
+message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+
+add_executable(spv_gen ll_gen.cpp)
+target_include_directories(spv_gen PRIVATE ${LLVM_INCLUDE_DIRS})
+target_compile_definitions(spv_gen PRIVATE ${LLVM_DEFINITIONS})
+llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
+target_link_libraries(spv_gen PRIVATE ${llvm_libs})
+
 set(OCLKernelBC ${PROJECT_BINARY_DIR}/test.bc)
 set(OCLKernelSRC ${PROJECT_SOURCE_DIR}/oclSimpleKernel.cl)
 set(OCLKernelSPV ${PROJECT_BINARY_DIR}/test.spv)
