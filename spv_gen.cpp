@@ -16,7 +16,7 @@ using namespace llvm;
 int main() {
   LLVMContext ctx;
   std::unique_ptr<Module> module = std::make_unique<Module>("code_generated", ctx);
-  module->setTargetTriple("spir64-unknown-unknown");
+  module->setTargetTriple("spir-unknown-unknown");
   IRBuilder<> builder(ctx);
 
   std::vector<Type *> args{Type::getFloatPtrTy(ctx, 1), Type::getFloatPtrTy(ctx, 1)};
@@ -48,13 +48,47 @@ int main() {
   builder.CreateStore(result, firstElemDst);
   builder.CreateRetVoid();
 
+  // set metadata -- pretend we're opencl (see
+  // https://github.com/KhronosGroup/SPIRV-LLVM-Translator/blob/master/docs/SPIRVRepresentationInLLVM.rst#spir-v-instructions-mapped-to-llvm-metadata)
+  Metadata *spirv_src_ops[] = {
+      ConstantAsMetadata::get(
+          ConstantInt::get(Type::getInt32Ty(ctx), 3 /*OpenCL_C*/)),
+      ConstantAsMetadata::get(
+          ConstantInt::get(Type::getInt32Ty(ctx), 102000 /*OpenCL ver 1.2*/))};
+  NamedMDNode *spirv_src = module->getOrInsertNamedMetadata("spirv.Source");
+  spirv_src->addOperand(MDNode::get(ctx, spirv_src_ops));
+
+  // Not required, leaving for reference
+  // Metadata *opencl_ver_ops[] = {
+  //   ConstantAsMetadata::get(ConstantInt::get(Type::getInt32Ty(ctx), 1)),
+  //   ConstantAsMetadata::get(ConstantInt::get(Type::getInt32Ty(ctx), 0))
+  // };
+  // NamedMDNode *opencl_ver =
+  // module->getOrInsertNamedMetadata("opencl.ocl.version");
+  // opencl_ver->addOperand(MDNode::get(ctx, opencl_ver_ops));
+
+  // Metadata *spirv_ver_ops[] = {
+  //   ConstantAsMetadata::get(ConstantInt::get(Type::getInt32Ty(ctx), 1)),
+  //   ConstantAsMetadata::get(ConstantInt::get(Type::getInt32Ty(ctx), 2))
+  // };
+  // NamedMDNode *spirv_ver =
+  // module->getOrInsertNamedMetadata("opencl.spir.version");
+  // spirv_ver->addOperand(MDNode::get(ctx, spirv_ver_ops));
+
+  // Metadata *spirv_gen_ops[] = {
+  //   ConstantAsMetadata::get(ConstantInt::get(Type::getInt32Ty(ctx), 6)),
+  //   ConstantAsMetadata::get(ConstantInt::get(Type::getInt32Ty(ctx), 14))
+  // };
+  // NamedMDNode *spirv_gen =
+  // module->getOrInsertNamedMetadata("spirv.Generator");
+  // spirv_gen->addOperand(MDNode::get(ctx, spirv_gen_ops));
+
   module->print(errs(), nullptr);
 
   SPIRV::TranslatorOpts opts;
   opts.enableAllExtensions();
-  // opts.setDesiredBIsRepresentation(SPIRV::BIsRepresentation::OpenCL12);
+  opts.setDesiredBIsRepresentation(SPIRV::BIsRepresentation::OpenCL12);
   opts.setDebugInfoEIS(SPIRV::DebugInfoEIS::OpenCL_DebugInfo_100);
-  opts.setDesiredBIsRepresentation(SPIRV::BIsRepresentation::SPIRVFriendlyIR);
 
   std::ostringstream ss;
   std::string err;
