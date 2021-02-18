@@ -1,5 +1,17 @@
 # Level zero & gfx snippets
 
+## Build
+Build dependencies:
+* llvm (targets llvm10)
+* SPIRV translator
+* level zero headers
+
+Runtime dependencies:
+* level zero (NEO runtime driver)
+* IGC
+
+All dependencies can be installed with https://github.com/kurapov-peter/gfx_deps
+
 ## Check gpu availability via L0
 
 Compile manually:  
