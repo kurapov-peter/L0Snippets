@@ -16,3 +16,14 @@ PATH=/path/to/llvm-spirv:$PATH make -j`nproc`
 llvm-spirv gen.bc -o gen.spv  
 ./simple_kernel_run gen.spv
 ```
+
+## Generated spirv execution
+```
+./spv_gen  // would generate spv_gen.spv  
+./simple_kernel_run spv_gen.spv
+```
+
+## Complete flow
+```
+./complete  // generates spirv in memory and runs it with similar to host.cpp code
+```
