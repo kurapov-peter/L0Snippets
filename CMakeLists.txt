@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.0)
 project(L0Snippets)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 add_executable(gpu_avail_check gpu_discover.cpp)
 target_link_libraries(gpu_avail_check PRIVATE ze_loader)
 
@@ -26,6 +29,12 @@ target_include_directories(spv_gen PRIVATE ${LLVM_INCLUDE_DIRS} ${LLVMSPIRVLib_I
 target_compile_definitions(spv_gen PRIVATE ${LLVM_DEFINITIONS})
 llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
 target_link_libraries(spv_gen PRIVATE ${llvm_libs} ${LLVMSPIRVLib_LIBRARIES})
+
+add_executable(complete complete_flow.cpp)
+target_include_directories(complete PRIVATE ${LLVM_INCLUDE_DIRS} ${LLVMSPIRVLib_INCLUDE_DIRS})
+target_compile_definitions(complete PRIVATE ${LLVM_DEFINITIONS})
+target_link_libraries(complete PRIVATE ${llvm_libs} ${LLVMSPIRVLib_LIBRARIES} ze_loader)
+
 
 set(OCLKernelBC ${PROJECT_BINARY_DIR}/test.bc)
 set(OCLKernelSRC ${PROJECT_SOURCE_DIR}/oclSimpleKernel.cl)
