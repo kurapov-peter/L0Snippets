@@ -49,7 +49,7 @@ int main() {
   // module->print(errs(), nullptr);
 
   std::error_code ec;
-  raw_fd_ostream os("gen.bc", ec, sys::fs::F_None);
+  raw_fd_ostream os("gen.bc", ec);
   WriteBitcodeToFile(*module.get(), os);
   os.flush();
   if (ec.value())
