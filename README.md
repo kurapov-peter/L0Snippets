@@ -12,6 +12,10 @@ Runtime dependencies:
 
 All dependencies can be installed with https://github.com/kurapov-peter/gfx_deps
 
+### Docker build
+docker build .
+docker run --network host --privileged -it --name snippets snippets:latest bash
+
 ## Check gpu availability via L0
 
 Compile manually:  
