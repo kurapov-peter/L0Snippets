@@ -34,3 +34,26 @@ entry:
     ; store i32 %ld, i32 addrspace(1)* %arrayidx, align 4
     ret void
 }
+
+define spir_func i32 @atomic_add(i32 addrspace(4)* %ptr, i32 %val) {
+entry:
+    %old = atomicrmw add i32 addrspace(4)* %ptr, i32 %val monotonic
+    ret i32 %old
+}
+
+; simulate an external function call with generic address spaces
+define spir_kernel void @sum_smem_with_cast(i32 addrspace(1)* %src, i32 addrspace(1)* %dst) {
+    entry:
+    %idx.i64 = call spir_func i64 @_Z32__spirv_BuiltInLocalInvocationIdi(i32 0)
+    %idx = trunc i64 %idx.i64 to i32
+    %slm.idx = getelementptr inbounds [1024 x i32], [1024 x i32] addrspace(3)* @slm.buf, i32 0, i32 0
+    %srcidx = getelementptr inbounds i32, i32 addrspace(1)* %src, i32 %idx
+    %ld = load i32, i32 addrspace(1)* %srcidx, align 4
+    %cast = addrspacecast i32 addrspace(3)* %slm.idx to i32 addrspace(4)*
+    %old = call spir_func i32 @atomic_add(i32 addrspace(4)* %cast, i32 %ld)
+    call spir_func void @_Z22__spirv_ControlBarrieri(i32 2, i32 2, i32 256)
+    %res = load i32, i32 addrspace(3)* %slm.idx, align 4
+    %arrayidx = getelementptr inbounds i32, i32 addrspace(1)* %dst, i32 0
+    store i32 %res, i32 addrspace(1)* %arrayidx, align 4
+    ret void
+}
