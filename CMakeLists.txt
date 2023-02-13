@@ -7,8 +7,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(gpu_avail_check gpu_discover.cpp)
 target_link_libraries(gpu_avail_check PRIVATE ze_loader)
 
-add_executable(simple_kernel_run host.cpp)
-target_link_libraries(simple_kernel_run PRIVATE ze_loader)
 
 find_package(LLVM REQUIRED CONFIG)
 message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
@@ -20,6 +18,12 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(LLVMSPIRVLib REQUIRED IMPORTED_TARGET LLVMSPIRVLib)
 
 add_subdirectory(common)
+
+add_executable(simple_kernel_run host.cpp)
+target_link_libraries(simple_kernel_run PRIVATE l0common)
+
+add_executable(smem_test smem_host.cpp)
+target_link_libraries(smem_test PRIVATE l0common)
 
 add_executable(ll_gen ll_gen.cpp)
 target_include_directories(ll_gen PRIVATE ${LLVM_INCLUDE_DIRS})
@@ -37,14 +41,19 @@ target_link_libraries(complete PRIVATE common ze_loader)
 set(OCLKernelBC ${PROJECT_BINARY_DIR}/test.bc)
 set(OCLKernelSRC ${PROJECT_SOURCE_DIR}/oclSimpleKernel.cl)
 set(OCLKernelSPV ${PROJECT_BINARY_DIR}/test.spv)
-set(HandWrittenLL ${PROJECT_SOURCE_DIR}/kernel_sample.ll)
+set(HandWrittenLL ${PROJECT_SOURCE_DIR}/kernels/kernel_sample.ll)
 set(HandWrittenBC ${PROJECT_BINARY_DIR}/hand.bc)
 set(HandWrittenSPV ${PROJECT_BINARY_DIR}/hand.spv)
+set(SharedMemLL ${PROJECT_SOURCE_DIR}/kernels/smem.ll)
+set(SharedMemBC ${PROJECT_BINARY_DIR}/smem.bc)
+set(SharedMemSPV ${PROJECT_BINARY_DIR}/smem.spv)
 
 add_custom_target(TestBC ALL DEPENDS ${OCLKernelBC})
 add_custom_target(TestSPV ALL DEPENDS ${OCLKernelSPV})
 add_custom_target(HandBC ALL DEPENDS ${HandWrittenBC})
 add_custom_target(HandSPV ALL DEPENDS ${HandWrittenSPV})
+add_custom_target(SmemBC ALL DEPENDS ${SharedMemBC})
+add_custom_target(SmemSPV ALL DEPENDS ${SharedMemSPV})
 
 add_custom_command(
     OUTPUT test.bc
@@ -58,6 +67,12 @@ add_custom_command(
     DEPENDS ${HandWrittenLL}
 )
 
+add_custom_command(
+    OUTPUT ${SharedMemBC}
+    COMMAND llvm-as ${SharedMemLL} -o ${SharedMemBC}
+    DEPENDS ${SharedMemLL}
+)
+
 function(add_compile_spirv_cmd IN OUT)
     add_custom_command(
         OUTPUT ${OUT}
@@ -68,3 +83,4 @@ endfunction()
 
 add_compile_spirv_cmd(${OCLKernelBC} ${OCLKernelSPV})
 add_compile_spirv_cmd(${HandWrittenBC} ${HandWrittenSPV})
+add_compile_spirv_cmd(${SharedMemBC} ${SharedMemSPV})
