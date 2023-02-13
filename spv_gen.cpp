@@ -13,7 +13,8 @@
 
 using namespace llvm;
 
-int main() {
+int main()
+{
   LLVMContext ctx;
   std::unique_ptr<Module> module = std::make_unique<Module>("code_generated", ctx);
   module->setTargetTriple("spir-unknown-unknown");
@@ -41,8 +42,14 @@ int main() {
   Constant *onef = ConstantFP::get(ctx, APFloat(1.f));
   Value *idx = builder.CreateCall(get_global_idj, zero, "idx");
   auto argit = f->args().begin();
+#if LLVM_VERSION_MAJOR > 12
+  Value *firstElemSrc = builder.CreateGEP(argit->getType()->getPointerElementType(), argit, idx, "src.idx");
+  ++argit;
+  Value *firstElemDst = builder.CreateGEP(argit->getType()->getPointerElementType(), argit, idx, "dst.idx");
+#else
   Value *firstElemSrc = builder.CreateGEP(f->args().begin(), idx, "src.idx");
   Value *firstElemDst = builder.CreateGEP(++argit, idx, "dst.idx");
+#endif
   Value *ldSrc = builder.CreateLoad(Type::getFloatTy(ctx), firstElemSrc, "ld");
   Value *result = builder.CreateFAdd(ldSrc, onef, "foo");
   builder.CreateStore(result, firstElemDst);
@@ -93,9 +100,12 @@ int main() {
   std::ostringstream ss;
   std::string err;
   auto success = writeSpirv(module.get(), opts, ss, err);
-  if (!success) {
+  if (!success)
+  {
     errs() << "Spirv translation failed with error: " << err << "\n";
-  } else {
+  }
+  else
+  {
     errs() << "Spirv tranlsation success.\n";
   }
   errs() << "Code size: " << ss.str().size() << "\n";
@@ -105,4 +115,3 @@ int main() {
 
   return 0;
 }
-

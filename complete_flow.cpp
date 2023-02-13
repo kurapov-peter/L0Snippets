@@ -17,17 +17,20 @@
 #include <sstream>
 #include <fstream>
 
-#define L0_SAFE_CALL(call)                                                     \
-  {                                                                            \
-    auto status = (call);                                                      \
-    if (status) {                                                              \
-      std::cerr << "L0 error: " << std::hex << (int)status << " ";             \
-      std::cerr << std::dec << __FILE__ << ":" << __LINE__ << std::endl;       \
-      exit(status);                                                            \
-    }                                                                          \
+#define L0_SAFE_CALL(call)                                               \
+  {                                                                      \
+    auto status = (call);                                                \
+    if (status)                                                          \
+    {                                                                    \
+      std::cerr << "L0 error: " << std::hex << (int)status << " ";       \
+      std::cerr << std::dec << __FILE__ << ":" << __LINE__ << std::endl; \
+      exit(status);                                                      \
+    }                                                                    \
   }
 
-template <typename T, size_t N> struct alignas(4096) AlignedArray {
+template <typename T, size_t N>
+struct alignas(4096) AlignedArray
+{
   T data[N];
 };
 
@@ -35,7 +38,8 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
                           ze_device_handle_t &hDevice,
                           ze_module_handle_t &hModule,
                           ze_command_queue_handle_t &hCommandQueue,
-                          ze_context_handle_t &hContext, std::string &spv) {
+                          ze_context_handle_t &hContext, std::string &spv)
+{
   ze_init_flag_t init_flag;
   L0_SAFE_CALL(zeInit(0));
 
@@ -48,23 +52,27 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
   L0_SAFE_CALL(zeDriverGet(&driverCount, allDrivers));
 
   // Find a driver instance with a GPU device
-  for (uint32_t i = 0; i < driverCount; ++i) {
+  for (uint32_t i = 0; i < driverCount; ++i)
+  {
     uint32_t deviceCount = 0;
     hDriver = allDrivers[i];
     L0_SAFE_CALL(zeDeviceGet(hDriver, &deviceCount, nullptr));
     ze_device_handle_t *allDevices =
         (ze_device_handle_t *)malloc(deviceCount * sizeof(ze_device_handle_t));
     L0_SAFE_CALL(zeDeviceGet(hDriver, &deviceCount, allDevices));
-    for (uint32_t d = 0; d < deviceCount; ++d) {
+    for (uint32_t d = 0; d < deviceCount; ++d)
+    {
       ze_device_properties_t device_properties;
       L0_SAFE_CALL(zeDeviceGetProperties(allDevices[d], &device_properties));
-      if (ZE_DEVICE_TYPE_GPU == device_properties.type) {
+      if (ZE_DEVICE_TYPE_GPU == device_properties.type)
+      {
         hDevice = allDevices[d];
         break;
       }
     }
     free(allDevices);
-    if (nullptr != hDevice) {
+    if (nullptr != hDevice)
+    {
       break;
     }
   }
@@ -116,7 +124,8 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
   L0_SAFE_CALL(zeModuleBuildLogGetString(buildlog, &szLog, strLog));
   std::fstream log;
   log.open("log.txt", std::ios::app);
-  if (!log.good()) {
+  if (!log.good())
+  {
     std::cerr << "Unable to open log file" << std::endl;
     exit(1);
   }
@@ -124,7 +133,8 @@ static void L0InitContext(ze_driver_handle_t &hDriver,
   log.close();
 }
 
-std::string generateSPV() {
+std::string generateSPV()
+{
   using namespace llvm;
   LLVMContext ctx;
   std::unique_ptr<Module> module =
@@ -155,8 +165,14 @@ std::string generateSPV() {
   Constant *onef = ConstantFP::get(ctx, APFloat(1.f));
   Value *idx = builder.CreateCall(get_global_idj, zero, "idx");
   auto argit = f->args().begin();
+#if LLVM_VERSION_MAJOR > 12
+  Value *firstElemSrc = builder.CreateGEP(argit->getType()->getPointerElementType(), argit, idx, "src.idx");
+  ++argit;
+  Value *firstElemDst = builder.CreateGEP(argit->getType()->getPointerElementType(), argit, idx, "dst.idx");
+#else
   Value *firstElemSrc = builder.CreateGEP(f->args().begin(), idx, "src.idx");
   Value *firstElemDst = builder.CreateGEP(++argit, idx, "dst.idx");
+#endif
   Value *ldSrc = builder.CreateLoad(Type::getFloatTy(ctx), firstElemSrc, "ld");
   Value *result = builder.CreateFAdd(ldSrc, onef, "foo");
   builder.CreateStore(result, firstElemDst);
@@ -182,9 +198,12 @@ std::string generateSPV() {
   std::ostringstream ss;
   std::string err;
   auto success = writeSpirv(module.get(), opts, ss, err);
-  if (!success) {
+  if (!success)
+  {
     errs() << "Spirv translation failed with error: " << err << "\n";
-  } else {
+  }
+  else
+  {
     errs() << "Spirv tranlsation success.\n";
   }
   errs() << "Code size: " << ss.str().size() << "\n";
@@ -192,7 +211,8 @@ std::string generateSPV() {
   return ss.str();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   auto spv = generateSPV();
 
   ze_device_handle_t hDevice = nullptr;
@@ -224,7 +244,8 @@ int main(int argc, char *argv[]) {
 
   constexpr int a_size = 32;
   AlignedArray<float, a_size> a, b;
-  for (auto i = 0; i < a_size; ++i) {
+  for (auto i = 0; i < a_size; ++i)
+  {
     a.data[i] = a_size - i;
     b.data[i] = i;
   }
@@ -271,7 +292,8 @@ int main(int argc, char *argv[]) {
   L0_SAFE_CALL(zeCommandQueueSynchronize(hCommandQueue,
                                          std::numeric_limits<uint32_t>::max()));
 
-  for (int i = 0; i < a_size; ++i) {
+  for (int i = 0; i < a_size; ++i)
+  {
     std::cout << b.data[i] << " ";
   }
   std::cout << std::endl;
