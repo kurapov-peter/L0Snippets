@@ -51,6 +51,9 @@ set(HandWrittenSPV ${PROJECT_BINARY_DIR}/hand.spv)
 set(SharedMemLL ${PROJECT_SOURCE_DIR}/kernels/smem.ll)
 set(SharedMemBC ${PROJECT_BINARY_DIR}/smem.bc)
 set(SharedMemSPV ${PROJECT_BINARY_DIR}/smem.spv)
+set(vcLL ${PROJECT_SOURCE_DIR}/kernels/vc.ll)
+set(vcBC ${PROJECT_BINARY_DIR}/vc.bc)
+set(vcSPV ${PROJECT_BINARY_DIR}/vc.spv)
 
 add_custom_target(TestBC ALL DEPENDS ${OCLKernelBC})
 add_custom_target(TestSPV ALL DEPENDS ${OCLKernelSPV})
@@ -58,6 +61,8 @@ add_custom_target(HandBC ALL DEPENDS ${HandWrittenBC})
 add_custom_target(HandSPV ALL DEPENDS ${HandWrittenSPV})
 add_custom_target(SmemBC ALL DEPENDS ${SharedMemBC})
 add_custom_target(SmemSPV ALL DEPENDS ${SharedMemSPV})
+add_custom_target(VCBC ALL DEPENDS ${vcBC})
+add_custom_target(VCSPV ALL DEPENDS ${vcSPV})
 
 add_custom_command(
     OUTPUT test.bc
@@ -77,6 +82,12 @@ add_custom_command(
     DEPENDS ${SharedMemLL}
 )
 
+add_custom_command(
+    OUTPUT ${vcBC}
+    COMMAND llvm-as ${vcLL} -o ${vcBC}
+    DEPENDS ${vcLL}
+)
+
 function(add_compile_spirv_cmd IN OUT)
     add_custom_command(
         OUTPUT ${OUT}
@@ -88,3 +99,4 @@ endfunction()
 add_compile_spirv_cmd(${OCLKernelBC} ${OCLKernelSPV})
 add_compile_spirv_cmd(${HandWrittenBC} ${HandWrittenSPV})
 add_compile_spirv_cmd(${SharedMemBC} ${SharedMemSPV})
+add_compile_spirv_cmd(${vcBC} ${vcSPV})
