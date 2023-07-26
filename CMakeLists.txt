@@ -3,6 +3,7 @@ project(L0Snippets)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(gpu_avail_check gpu_discover.cpp)
 target_link_libraries(gpu_avail_check PRIVATE ze_loader)
