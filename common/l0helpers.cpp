@@ -11,8 +11,7 @@ void L0InitContext(ze_driver_handle_t &hDriver,
                    ze_device_handle_t &hDevice,
                    ze_module_handle_t &hModule,
                    ze_command_queue_handle_t &hCommandQueue,
-                   ze_context_handle_t &hContext,
-                   std::string &spvFilename)
+                   ze_context_handle_t &hContext)
 {
     ze_init_flag_t init_flag;
     L0_SAFE_CALL(zeInit(0));
@@ -68,8 +67,14 @@ void L0InitContext(ze_driver_handle_t &hDriver,
         ZE_COMMAND_QUEUE_PRIORITY_NORMAL};
     L0_SAFE_CALL(zeCommandQueueCreate(hContext, hDevice, &commandQueueDesc,
                                       &hCommandQueue));
+}
 
-    // todo: separate out the module creation
+void L0BuildModule(ze_device_handle_t &hDevice,
+                   ze_context_handle_t &hContext,
+                   ze_module_handle_t &hModule,
+                   const std::string &spvFilename,
+                   const std::string &buildParams)
+{
     std::ifstream is;
     std::string fn = spvFilename;
 
@@ -100,7 +105,7 @@ void L0InitContext(ze_driver_handle_t &hDriver,
     ze_module_desc_t moduleDesc;
     moduleDesc.stype = ZE_STRUCTURE_TYPE_MODULE_DESC;
     moduleDesc.pNext = nullptr;
-    moduleDesc.pBuildFlags = "";
+    moduleDesc.pBuildFlags = buildParams.c_str();
     moduleDesc.format = ZE_MODULE_FORMAT_IL_SPIRV;
     moduleDesc.inputSize = codeSize;
     moduleDesc.pConstants = nullptr;

@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
     ze_driver_handle_t hDriver = nullptr;
     ze_command_queue_handle_t hCommandQueue = nullptr;
     ze_context_handle_t hContext = nullptr;
-    L0InitContext(hDriver, hDevice, hModule, hCommandQueue, hContext, spvFilename);
+    L0InitContext(hDriver, hDevice, hModule, hCommandQueue, hContext);
+    L0BuildModule(hDevice, hContext, hModule, spvFilename, "");
 
     ze_command_list_handle_t hCommandList;
     ze_kernel_handle_t hKernel;

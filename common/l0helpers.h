@@ -26,5 +26,10 @@ void L0InitContext(ze_driver_handle_t &hDriver,
                    ze_device_handle_t &hDevice,
                    ze_module_handle_t &hModule,
                    ze_command_queue_handle_t &hCommandQueue,
+                   ze_context_handle_t &hContext);
+
+void L0BuildModule(ze_device_handle_t &hDevice,
                    ze_context_handle_t &hContext,
-                   std::string &spvFilename);
+                   ze_module_handle_t &hModule,
+                   const std::string &spvFilename,
+                   const std::string &buildParams);
