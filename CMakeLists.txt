@@ -35,7 +35,7 @@ add_executable(spv_gen spv_gen.cpp)
 target_link_libraries(spv_gen PRIVATE common)
 
 add_executable(complete complete_flow.cpp)
-target_link_libraries(complete PRIVATE common ze_loader)
+target_link_libraries(complete PRIVATE common l0common)
 
 
 set(OCLKernelBC ${PROJECT_BINARY_DIR}/test.bc)

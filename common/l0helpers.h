@@ -11,6 +11,7 @@
         if (status)                                                            \
         {                                                                      \
             std::cerr << "L0 error: " << std::hex << (int)status << " ";       \
+            std::cerr << L0ErrorToString(status) << " ";                       \
             std::cerr << std::dec << __FILE__ << ":" << __LINE__ << std::endl; \
             exit(status);                                                      \
         }                                                                      \
@@ -42,3 +43,5 @@ void L0CreateCommandList(ze_command_list_handle_t &hCommandList,
 void L0CreateKernel(ze_kernel_handle_t &hKernel,
                     ze_module_handle_t &hModule,
                     const std::string &kernelName);
+
+std::string L0ErrorToString(ze_result_t status);
