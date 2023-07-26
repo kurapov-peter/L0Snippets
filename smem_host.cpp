@@ -20,21 +20,8 @@ int main(int argc, char *argv[])
     ze_command_list_handle_t hCommandList;
     ze_kernel_handle_t hKernel;
 
-    ze_command_list_desc_t commandListDesc;
-    commandListDesc.stype = ZE_STRUCTURE_TYPE_COMMAND_LIST_DESC;
-    commandListDesc.pNext = nullptr;
-    commandListDesc.flags = 0;
-    commandListDesc.commandQueueGroupOrdinal = 0;
-
-    L0_SAFE_CALL(zeCommandListCreate(hContext, hDevice, &commandListDesc, &hCommandList));
-
-    ze_kernel_desc_t kernelDesc;
-    kernelDesc.stype = ZE_STRUCTURE_TYPE_KERNEL_DESC;
-    kernelDesc.pNext = nullptr;
-    kernelDesc.flags = 0;
-    kernelDesc.pKernelName = kernelName.c_str();
-
-    L0_SAFE_CALL(zeKernelCreate(hModule, &kernelDesc, &hKernel));
+    L0CreateCommandList(hCommandList, hContext, hDevice, hCommandQueue);
+    L0CreateKernel(hKernel, hModule, kernelName);
 
     constexpr int a_size = 32;
     AlignedArray<int, a_size> a, b;

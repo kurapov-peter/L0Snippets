@@ -33,3 +33,12 @@ void L0BuildModule(ze_device_handle_t &hDevice,
                    ze_module_handle_t &hModule,
                    const std::string &spvFilename,
                    const std::string &buildParams);
+
+void L0CreateCommandList(ze_command_list_handle_t &hCommandList,
+                         ze_context_handle_t &hContext,
+                         ze_device_handle_t &hDevice,
+                         ze_command_queue_handle_t &hCommandQueue);
+
+void L0CreateKernel(ze_kernel_handle_t &hKernel,
+                    ze_module_handle_t &hModule,
+                    const std::string &kernelName);

@@ -129,3 +129,30 @@ void L0BuildModule(ze_device_handle_t &hDevice,
     log << strLog;
     log.close();
 }
+
+void L0CreateCommandList(ze_command_list_handle_t &hCommandList,
+                         ze_context_handle_t &hContext,
+                         ze_device_handle_t &hDevice,
+                         ze_command_queue_handle_t &hCommandQueue)
+{
+    ze_command_list_desc_t commandListDesc;
+    commandListDesc.stype = ZE_STRUCTURE_TYPE_COMMAND_LIST_DESC;
+    commandListDesc.pNext = nullptr;
+    commandListDesc.flags = 0;
+    commandListDesc.commandQueueGroupOrdinal = 0;
+
+    L0_SAFE_CALL(zeCommandListCreate(hContext, hDevice, &commandListDesc, &hCommandList));
+}
+
+void L0CreateKernel(ze_kernel_handle_t &hKernel,
+                    ze_module_handle_t &hModule,
+                    const std::string &kernelName)
+{
+    ze_kernel_desc_t kernelDesc;
+    kernelDesc.stype = ZE_STRUCTURE_TYPE_KERNEL_DESC;
+    kernelDesc.pNext = nullptr;
+    kernelDesc.flags = 0;
+    kernelDesc.pKernelName = kernelName.c_str();
+
+    L0_SAFE_CALL(zeKernelCreate(hModule, &kernelDesc, &hKernel));
+}
