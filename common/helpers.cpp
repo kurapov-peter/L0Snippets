@@ -42,7 +42,11 @@ std::string generatePlusOneSPV()
     Constant *onef = ConstantFP::get(ctx, APFloat(1.f));
     Value *idx = builder.CreateCall(get_global_idj, zero, "idx");
     auto argit = f->args().begin();
-#if LLVM_VERSION_MAJOR > 12
+#if LLVM_VERSION_MAJOR > 15
+    Value *firstElemSrc = builder.CreateGEP(argit->getType(), argit, idx, "src.idx");
+    ++argit;
+    Value *firstElemDst = builder.CreateGEP(argit->getType(), argit, idx, "dst.idx");
+#elif LLVM_VERSION_MAJOR > 12
     Value *firstElemSrc = builder.CreateGEP(argit->getType()->getPointerElementType(), argit, idx, "src.idx");
     ++argit;
     Value *firstElemDst = builder.CreateGEP(argit->getType()->getPointerElementType(), argit, idx, "dst.idx");
