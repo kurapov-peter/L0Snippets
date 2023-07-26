@@ -26,6 +26,9 @@ target_link_libraries(simple_kernel_run PRIVATE l0common)
 add_executable(smem_test smem_host.cpp)
 target_link_libraries(smem_test PRIVATE l0common)
 
+add_executable(vc_test host_vc.cpp)
+target_link_libraries(vc_test PRIVATE l0common)
+
 add_executable(ll_gen ll_gen.cpp)
 target_include_directories(ll_gen PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(ll_gen PRIVATE ${LLVM_DEFINITIONS})
