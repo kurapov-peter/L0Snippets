@@ -2,7 +2,7 @@
 
 ## Build
 Build dependencies:
-* llvm (targets llvm10)
+* llvm (tested with versions 10, 14, 16)
 * SPIRV translator
 * level zero headers
 
