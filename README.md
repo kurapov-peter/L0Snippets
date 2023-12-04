@@ -18,6 +18,23 @@ docker build .
 docker run --network host --privileged -it --name snippets snippets:latest bash
 ```
 
+### Conda build
+First time conda env creation:
+```
+conda env create -f scripts/snippets-conda-env.yml
+conda activate snippets-dev
+```
+
+Update existing conda env with:
+```
+conda env update -f scripts/snippets-conda-env.yml
+```
+
+```
+cmake -Bbuild -GNinja .
+cmake --build build
+```
+
 ## Check gpu availability via L0
 
 Compile manually:  

@@ -1,0 +1,19 @@
+name: snippets-dev
+channels: 
+  - conda-forge
+
+dependencies:
+  - gxx_linux-64   12.*
+  - gcc_linux-64   12.*
+  - ccache
+  - sysroot_linux-64 >=2.14
+  - cmake
+  - ninja
+  - llvmdev     16.*
+  - llvm
+  - llvm-spirv 16.0.*
+  - libllvmspirv 16.0.*
+  - clangdev   16.*
+  - level-zero-devel
+  - pkg-config
+  - zlib
