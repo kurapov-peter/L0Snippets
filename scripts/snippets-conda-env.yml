@@ -17,3 +17,4 @@ dependencies:
   - level-zero-devel
   - pkg-config
   - zlib
+  - mlir

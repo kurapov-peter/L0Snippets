@@ -15,6 +15,10 @@ message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
 llvm_map_components_to_libnames(llvm_libs support core irreader bitwriter)
 message(STATUS "llvm libs: ${llvm_libs}")
 
+find_package(MLIR REQUIRED CONFIG)
+message(STATUS "Found MLIR ${MLIR_PACKAGE_VERSION}")
+message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
+
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(LLVMSPIRVLib REQUIRED IMPORTED_TARGET LLVMSPIRVLib)
 
@@ -100,3 +104,5 @@ add_compile_spirv_cmd(${OCLKernelBC} ${OCLKernelSPV})
 add_compile_spirv_cmd(${HandWrittenBC} ${HandWrittenSPV})
 add_compile_spirv_cmd(${SharedMemBC} ${SharedMemSPV})
 add_compile_spirv_cmd(${vcBC} ${vcSPV})
+
+add_subdirectory(jitted)
