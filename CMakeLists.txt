@@ -43,7 +43,7 @@ target_link_libraries(complete PRIVATE common l0common)
 
 
 set(OCLKernelBC ${PROJECT_BINARY_DIR}/test.bc)
-set(OCLKernelSRC ${PROJECT_SOURCE_DIR}/oclSimpleKernel.cl)
+set(OCLKernelSRC ${PROJECT_SOURCE_DIR}/kernels/oclSimpleKernel.cl)
 set(OCLKernelSPV ${PROJECT_BINARY_DIR}/test.spv)
 set(HandWrittenLL ${PROJECT_SOURCE_DIR}/kernels/kernel_sample.ll)
 set(HandWrittenBC ${PROJECT_BINARY_DIR}/hand.bc)
