@@ -14,6 +14,49 @@
 #include <sstream>
 #include <fstream>
 
+void L0BuildModuleInMemory(ze_device_handle_t &hDevice,
+                           ze_context_handle_t &hContext,
+                           ze_module_handle_t &hModule,
+                           const std::string &spv)
+{
+  size_t codeSize = spv.size();
+  assert(codeSize != 0 && "Code size is 0.");
+  unsigned char *codeBin = new unsigned char[codeSize];
+  std::copy(spv.data(), spv.data() + codeSize, codeBin);
+
+  std::ofstream out("complete.spv", std::ios::binary);
+  out.write((char *)codeBin, codeSize);
+
+  assert(codeSize && "CodeBin is empty");
+
+  ze_module_desc_t moduleDesc;
+  moduleDesc.stype = ZE_STRUCTURE_TYPE_MODULE_DESC;
+  moduleDesc.pNext = nullptr;
+  moduleDesc.pBuildFlags = "";
+  moduleDesc.format = ZE_MODULE_FORMAT_IL_SPIRV;
+  moduleDesc.inputSize = codeSize;
+  moduleDesc.pConstants = nullptr;
+  moduleDesc.pInputModule = (uint8_t *)codeBin;
+
+  ze_module_build_log_handle_t buildlog = nullptr;
+  L0_SAFE_CALL(
+      zeModuleCreate(hContext, hDevice, &moduleDesc, &hModule, &buildlog));
+  size_t szLog = 0;
+  L0_SAFE_CALL(zeModuleBuildLogGetString(buildlog, &szLog, nullptr));
+  std::cout << "Got build log size " << szLog << std::endl;
+  char *strLog = (char *)malloc(szLog);
+  L0_SAFE_CALL(zeModuleBuildLogGetString(buildlog, &szLog, strLog));
+  std::fstream log;
+  log.open("log.txt", std::ios::app);
+  if (!log.good())
+  {
+    std::cerr << "Unable to open log file" << std::endl;
+    exit(1);
+  }
+  log << strLog;
+  log.close();
+}
+
 int main(int argc, char *argv[])
 {
   auto spv = generatePlusOneSPV();
@@ -24,7 +67,7 @@ int main(int argc, char *argv[])
   ze_command_queue_handle_t hCommandQueue = nullptr;
   ze_context_handle_t hContext = nullptr;
   L0InitContext(hDriver, hDevice, hModule, hCommandQueue, hContext);
-  L0BuildModule(hDevice, hContext, hModule, "complete.spv", "");
+  L0BuildModuleInMemory(hDevice, hContext, hModule, spv);
 
   ze_command_list_handle_t hCommandList;
   ze_kernel_handle_t hKernel;
